@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "bun server/index.ts",
-    "dev": "bun --watch server/index.ts"
+    "dev": "bun --watch server/index.ts",
+    "build": "bun build"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.9",
