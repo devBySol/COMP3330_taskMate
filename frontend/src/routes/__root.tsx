@@ -13,7 +13,7 @@ function NavBar() {
         <div className="text-lg font-bold flex items-center space-x-2">
           <img src="/bcit.png" alt="BCIT Logo" className="w-8 h-8" />
           <Link to="/" className="hover:text-gray-200">
-            TaskMate
+            Task Mate
           </Link>
         </div>
         <div className="flex space-x-4">
