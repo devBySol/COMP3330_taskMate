@@ -1,19 +1,20 @@
 import * as React from "react";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "../components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
+import { Calendar } from "../../components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
 import { format } from "date-fns";
-import { Textarea } from "../components/ui/textarea";
-import { api } from "../lib/api";
+import { Textarea } from "../../components/ui/textarea";
+import { api } from "../../lib/api";
 import type { FieldApi } from "@tanstack/react-form";
+import { QueryClient } from "@tanstack/react-query";
 
-export const Route = createFileRoute("/createTask")({
+export const Route = createFileRoute("/_authenticated/createTask")({
   component: CreateTask,
 });
 
@@ -41,6 +42,8 @@ type TaskFormValues = {
 
 function CreateTask() {
   const navigate = useNavigate();
+  const queryClient = new QueryClient();
+
   const form = useForm<TaskFormValues>({
     defaultValues: {
       courseName: "",
@@ -52,12 +55,21 @@ function CreateTask() {
       await new Promise((r) => setTimeout(r, 3000));
       console.log("Submitted values:", values);
 
-      const status = values.value.status === true ? "completed" : values.value.status === false ? "pending" : null;
+      // const status = values.value.status === true ? "completed" : values.value.status === false ? "pending" : null;
 
       const res = await api.BcitTasks.$post({ json: values.value });
       if (!res.ok) {
         throw new Error("Server error");
       }
+
+      const newTask = await res.json();
+      const existingTasks = await queryClient.ensureQueryData({ queryKey: ["tasks"] });
+
+      queryClient.setQueryData(["tasks"], (oldTasks: any) => ({
+        ...oldTasks,
+        tasks: [...oldTasks.tasks, newTask],
+      }));
+
       console.log("Task Created:", values);
       navigate({ to: "/tasks" });
     },

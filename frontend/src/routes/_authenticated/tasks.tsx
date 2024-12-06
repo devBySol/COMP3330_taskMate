@@ -1,11 +1,11 @@
-import { api } from "../lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { api, deleteTask, getAllTasksQueryOptions } from "../../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
-import { Skeleton } from "../components/ui/skeleton";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Skeleton } from "../../components/ui/skeleton";
 import { useState } from "react";
+import { toast } from "sonner";
 
-// Task type definition
 type Task = {
   status: boolean | null;
   id: number;
@@ -15,12 +15,11 @@ type Task = {
   userId: string;
 };
 
-export const Route = createFileRoute("/tasks")({
+export const Route = createFileRoute("/_authenticated/tasks")({
   component: Tasks,
 });
 
 async function getAllTasks() {
-  await new Promise((r) => setTimeout(r, 3000));
   const res = await api.BcitTasks.$get();
   if (!res.ok) {
     throw new Error("Failed to fetch tasks");
@@ -35,7 +34,12 @@ function Tasks() {
     queryFn: getAllTasks,
   });
 
-  const [sortConfig, setSortConfig] = useState<{ key: keyof Task; direction: "asc" | "desc" }>({
+  const queryClient = useQueryClient();
+
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Task;
+    direction: "asc" | "desc";
+  }>({
     key: "id",
     direction: "asc",
   });
@@ -45,13 +49,11 @@ function Tasks() {
     if (sortConfig.key === column && sortConfig.direction === "asc") {
       direction = "desc";
     }
-
     setSortConfig({ key: column, direction });
   };
 
   const sortedData = () => {
     if (!data) return [];
-
     return [...data].sort((a, b) => {
       const aValue = a[sortConfig.key] ?? "";
       const bValue = b[sortConfig.key] ?? "";
@@ -67,6 +69,29 @@ function Tasks() {
   };
 
   if (isError) return <div>An error has occurred: {error.message}</div>;
+
+  function TaskDeleteButton({ id }: { id: number }) {
+    const mutation = useMutation({
+      mutationFn: deleteTask,
+      onError: (error) => {
+        console.error("Error deleting task:", error);
+        toast.error(`Failed to delete task: ${id}`, { position: "top-right" });
+      },
+      onSuccess: () => {
+        console.log(`Task ${id} deleted successfully!`);
+        toast.success(`Task ${id} deleted successfully!`, { position: "top-right" });
+        queryClient.invalidateQueries({
+          queryKey: ["getAllTasks"],
+        });
+      },
+    });
+
+    return (
+      <button onClick={() => mutation.mutate({ id })} className="text-red-500 hover:text-red-700" disabled={mutation.isPending}>
+        {mutation.isPending ? "..." : "Delete"}
+      </button>
+    );
+  }
 
   return (
     <div className="p-5">
@@ -128,6 +153,9 @@ function Tasks() {
                     <TableCell>
                       <Skeleton className="h-5" />
                     </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-5" />
+                    </TableCell>
                   </TableRow>
                 ))
             : sortedData()?.map((task) => (
@@ -137,7 +165,10 @@ function Tasks() {
                   <TableCell>{task.description}</TableCell>
                   <TableCell>{new Date(task.dueDate).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded text-sm ${task.status === true ? "bg-green-200 text-green-800" : task.status === null ? "bg-blue-200 text-blue-800" : "bg-gray-200 text-gray-800"}`}>{task.status === true ? "Completed" : task.status === null ? "In Progress" : "Pending"}</span>
+                    <span className={`px-2 py-1 rounded text-sm ${task.status === true ? "bg-[#1e9b6d] text-white-800" : task.status === null ? "bg-[#66c2ff] text-white-800" : "bg-[#ffbb33] text-white-800"}`}>{task.status === true ? "Completed" : task.status === null ? "In Progress" : "Pending"}</span>
+                  </TableCell>
+                  <TableCell>
+                    <TaskDeleteButton id={task.id} />
                   </TableCell>
                 </TableRow>
               ))}
