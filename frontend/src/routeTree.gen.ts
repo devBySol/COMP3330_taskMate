@@ -12,8 +12,10 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as TasksImport } from './routes/tasks'
+import { Route as ProfileImport } from './routes/profile'
 import { Route as CreateTaskImport } from './routes/createTask'
 import { Route as AboutImport } from './routes/about'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -21,6 +23,12 @@ import { Route as IndexImport } from './routes/index'
 const TasksRoute = TasksImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProfileRoute = ProfileImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -33,6 +41,11 @@ const CreateTaskRoute = CreateTaskImport.update({
 const AboutRoute = AboutImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -53,6 +66,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -65,6 +85,13 @@ declare module '@tanstack/react-router' {
       path: '/createTask'
       fullPath: '/createTask'
       preLoaderRoute: typeof CreateTaskImport
+      parentRoute: typeof rootRoute
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileImport
       parentRoute: typeof rootRoute
     }
     '/tasks': {
@@ -81,46 +108,63 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '': typeof AuthenticatedRoute
   '/about': typeof AboutRoute
   '/createTask': typeof CreateTaskRoute
+  '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '': typeof AuthenticatedRoute
   '/about': typeof AboutRoute
   '/createTask': typeof CreateTaskRoute
+  '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRoute
   '/about': typeof AboutRoute
   '/createTask': typeof CreateTaskRoute
+  '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/createTask' | '/tasks'
+  fullPaths: '/' | '' | '/about' | '/createTask' | '/profile' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/createTask' | '/tasks'
-  id: '__root__' | '/' | '/about' | '/createTask' | '/tasks'
+  to: '/' | '' | '/about' | '/createTask' | '/profile' | '/tasks'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/about'
+    | '/createTask'
+    | '/profile'
+    | '/tasks'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRoute
   AboutRoute: typeof AboutRoute
   CreateTaskRoute: typeof CreateTaskRoute
+  ProfileRoute: typeof ProfileRoute
   TasksRoute: typeof TasksRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRoute,
   AboutRoute: AboutRoute,
   CreateTaskRoute: CreateTaskRoute,
+  ProfileRoute: ProfileRoute,
   TasksRoute: TasksRoute,
 }
 
@@ -135,19 +179,27 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/_authenticated",
         "/about",
         "/createTask",
+        "/profile",
         "/tasks"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
+    "/_authenticated": {
+      "filePath": "_authenticated.tsx"
+    },
     "/about": {
       "filePath": "about.tsx"
     },
     "/createTask": {
       "filePath": "createTask.tsx"
+    },
+    "/profile": {
+      "filePath": "profile.tsx"
     },
     "/tasks": {
       "filePath": "tasks.tsx"

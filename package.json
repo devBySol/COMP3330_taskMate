@@ -9,14 +9,26 @@
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.9",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.29.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.4.1",
+    "@kinde-oss/kinde-typescript-sdk": "^2.9.1",
+    "@tanstack/react-form": "^0.37.1",
+    "@tanstack/react-router": "^1.85.0",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.37.0",
     "hono": "^4.6.11",
+    "pg": "^8.13.1",
+    "postgres": "^3.4.5",
+    "react-calendar": "^5.1.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-hook-form": "^7.53.2",
     "zod": "^3.23.8"
   }
 }
